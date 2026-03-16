@@ -32,6 +32,7 @@ export interface Employee {
   employeeStatus: EmploymentStatus;
   phone: string;
   address: string;
+  user: User;
   createdAt: string;
   updatedAt: string;
 }

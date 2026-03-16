@@ -1,33 +1,36 @@
-'use client';
+"use client";
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { skillsApi } from '@/lib/api/skills';
-import { SkillInput } from '@/lib/schemas/skill.schema';
-import { Skill } from '@/lib/types';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { skillsApi } from "@/lib/api/skills";
+import { SkillInput } from "@/lib/schemas/skill.schema";
+import { Skill } from "@/lib/types";
 
 export function useSkills() {
   const queryClient = useQueryClient();
 
-  const { data: skills = [], isLoading } = useQuery({
-    queryKey: ['skills'],
+  const { data: skills, isLoading } = useQuery({
+    queryKey: ["skills"],
     queryFn: skillsApi.getAll,
   });
 
   const createMutation = useMutation({
     mutationFn: skillsApi.create,
     onMutate: async (newSkill) => {
-      await queryClient.cancelQueries({ queryKey: ['skills'] });
-      const previous = queryClient.getQueryData(['skills']);
-      queryClient.setQueryData(['skills'], (old: Skill[] = []) => [...old, { ...newSkill, id: 'temp-id' } as Skill]);
+      await queryClient.cancelQueries({ queryKey: ["skills"] });
+      const previous = queryClient.getQueryData(["skills"]);
+      queryClient.setQueryData(["skills"], (old: Skill[] = []) => [
+        ...old,
+        { ...newSkill, id: "temp-id" } as Skill,
+      ]);
       return { previous };
     },
     onError: (err, variables, context) => {
       if (context?.previous) {
-        queryClient.setQueryData(['skills'], context.previous);
+        queryClient.setQueryData(["skills"], context.previous);
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['skills'] });
+      queryClient.invalidateQueries({ queryKey: ["skills"] });
     },
   });
 
@@ -35,46 +38,46 @@ export function useSkills() {
     mutationFn: ({ id, data }: { id: string; data: Partial<SkillInput> }) =>
       skillsApi.update(id, data),
     onMutate: async ({ id, data }) => {
-      await queryClient.cancelQueries({ queryKey: ['skills'] });
-      const previous = queryClient.getQueryData(['skills']);
-      queryClient.setQueryData(['skills'], (old: Skill[] = []) =>
-        old.map((skill) => (skill.id === id ? { ...skill, ...data } : skill))
+      await queryClient.cancelQueries({ queryKey: ["skills"] });
+      const previous = queryClient.getQueryData(["skills"]);
+      queryClient.setQueryData(["skills"], (old: Skill[] = []) =>
+        old.map((skill) => (skill.id === id ? { ...skill, ...data } : skill)),
       );
       return { previous };
     },
     onError: (err, variables, context) => {
       if (context?.previous) {
-        queryClient.setQueryData(['skills'], context.previous);
+        queryClient.setQueryData(["skills"], context.previous);
       }
     },
     onSettled: (data, error, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['skills'] });
-      queryClient.invalidateQueries({ queryKey: ['skills', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ["skills"] });
+      queryClient.invalidateQueries({ queryKey: ["skills", variables.id] });
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: skillsApi.delete,
     onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey: ['skills'] });
-      const previous = queryClient.getQueryData(['skills']);
-      queryClient.setQueryData(['skills'], (old: Skill[] = []) =>
-        old.filter((skill) => skill.id !== id)
+      await queryClient.cancelQueries({ queryKey: ["skills"] });
+      const previous = queryClient.getQueryData(["skills"]);
+      queryClient.setQueryData(["skills"], (old: Skill[] = []) =>
+        old.filter((skill) => skill.id !== id),
       );
       return { previous };
     },
     onError: (err, variables, context) => {
       if (context?.previous) {
-        queryClient.setQueryData(['skills'], context.previous);
+        queryClient.setQueryData(["skills"], context.previous);
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['skills'] });
+      queryClient.invalidateQueries({ queryKey: ["skills"] });
     },
   });
 
   return {
-    skills,
+    skills: skills?.data || [],
     isLoading,
     createSkill: createMutation.mutate,
     isCreating: createMutation.isPending,
@@ -87,20 +90,20 @@ export function useSkills() {
 
 export function useSkill(id: string) {
   const { data: skill, isLoading } = useQuery({
-    queryKey: ['skills', id],
+    queryKey: ["skills", id],
     queryFn: () => skillsApi.getById(id),
     enabled: !!id,
   });
 
   return {
-    skill,
+    skill: skill?.data,
     isLoading,
   };
 }
 
 export function useSkillSearch(skillId: string) {
   const { data: employees = [], isLoading } = useQuery({
-    queryKey: ['skills', skillId, 'employees'],
+    queryKey: ["skills", skillId, "employees"],
     queryFn: () => skillsApi.searchBySkill(skillId),
     enabled: !!skillId,
   });

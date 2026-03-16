@@ -120,9 +120,6 @@ export default function EmployeesPage() {
                   <th className="px-6 py-3 text-left text-sm font-medium">
                     Position
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium">
-                    Department
-                  </th>
                   {isManager && (
                     <th className="px-6 py-3 text-right text-sm font-medium">
                       Actions
@@ -138,16 +135,13 @@ export default function EmployeesPage() {
                         href={`/employees/${employee.id}`}
                         className="font-medium hover:text-primary"
                       >
-                        {employee.name}
+                        {employee.firstName + " " + employee.lastName}
                       </Link>
                     </td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">
-                      {employee.email}
+                      {employee.user.email}
                     </td>
                     <td className="px-6 py-4 text-sm">{employee.position}</td>
-                    <td className="px-6 py-4 text-sm">
-                      {employee.department || "-"}
-                    </td>
                     {isManager && (
                       <td className="px-6 py-4 text-right">
                         <div className="flex justify-end gap-2">
@@ -195,20 +189,6 @@ export default function EmployeesPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium">Email</label>
-                <input
-                  type="email"
-                  {...register("email")}
-                  className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.email.message}
-                  </p>
-                )}
-              </div>
-
-              <div>
                 <label className="block text-sm font-medium">Position</label>
                 <input
                   {...register("position")}
@@ -219,14 +199,6 @@ export default function EmployeesPage() {
                     {errors.position.message}
                   </p>
                 )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium">Department</label>
-                <input
-                  {...register("department")}
-                  className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                />
               </div>
 
               <div className="flex gap-2">

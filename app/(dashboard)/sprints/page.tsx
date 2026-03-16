@@ -15,7 +15,6 @@ const statusColors = {
   planning: "bg-gray-200 text-gray-800",
   active: "bg-blue-200 text-blue-800",
   completed: "bg-green-200 text-green-800",
-  cancelled: "bg-red-200 text-red-800",
 };
 
 export default function SprintsPage() {
@@ -255,7 +254,6 @@ export default function SprintsPage() {
                   <option value="planning">Planning</option>
                   <option value="active">Active</option>
                   <option value="completed">Completed</option>
-                  <option value="cancelled">Cancelled</option>
                 </select>
               </div>
 
