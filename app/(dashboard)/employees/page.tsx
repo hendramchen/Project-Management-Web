@@ -10,6 +10,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { employeeSchema, EmployeeInput } from "@/lib/schemas/employee.schema";
 import { toast } from "sonner";
+import { DataTable } from "./data-table";
+import { getEmployeeColumns } from "./columns";
 
 export default function EmployeesPage() {
   const {
@@ -79,6 +81,12 @@ export default function EmployeesPage() {
 
   const isManager = user?.role === "admin" || user?.role === "manager";
 
+  const employeeColumns = getEmployeeColumns({
+    isManager,
+    handleEdit,
+    handleDelete,
+  });
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -106,64 +114,9 @@ export default function EmployeesPage() {
           <p className="text-muted-foreground">No employees found</p>
         </div>
       ) : (
-        <div className="rounded-lg border bg-white shadow-sm">
+        <div className="rounded-lg bg-white shadow-sm">
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="border-b bg-muted/50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-sm font-medium">
-                    Name
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium">
-                    Email
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium">
-                    Position
-                  </th>
-                  {isManager && (
-                    <th className="px-6 py-3 text-right text-sm font-medium">
-                      Actions
-                    </th>
-                  )}
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {employees.map((employee) => (
-                  <tr key={employee.id} className="hover:bg-muted/30">
-                    <td className="px-6 py-4">
-                      <Link
-                        href={`/employees/${employee.id}`}
-                        className="font-medium hover:text-primary"
-                      >
-                        {employee.firstName + " " + employee.lastName}
-                      </Link>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">
-                      {employee.user.email}
-                    </td>
-                    <td className="px-6 py-4 text-sm">{employee.position}</td>
-                    {isManager && (
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex justify-end gap-2">
-                          <button
-                            onClick={() => handleEdit(employee)}
-                            className="rounded p-1 hover:bg-muted"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(employee.id)}
-                            className="rounded p-1 hover:bg-muted"
-                          >
-                            <Trash2 className="h-4 w-4 text-red-600" />
-                          </button>
-                        </div>
-                      </td>
-                    )}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <DataTable columns={employeeColumns} data={employees} />
           </div>
         </div>
       )}

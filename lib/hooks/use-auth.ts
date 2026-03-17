@@ -3,8 +3,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { authApi } from "@/lib/api/auth";
-import { LoginInput, RegisterInput } from "@/lib/schemas/auth.schema";
-import { User } from "@/lib/types";
+// import { LoginInput, RegisterInput } from "@/lib/schemas/auth.schema";
+// import { User } from "@/lib/types";
 
 export function useAuth() {
   const router = useRouter();
@@ -21,10 +21,12 @@ export function useAuth() {
   const loginMutation = useMutation({
     mutationFn: authApi.login,
     onSuccess: (data) => {
+      console.log("loginMutation onSuccess", data);
       localStorage.setItem("access_token", data.data.accessToken);
       // localStorage.setItem('refresh_token', data.data.refresh_token);
       queryClient.setQueryData(["user"], data.data.user);
       router.push("/dashboard");
+      console.log("router.push('/dashboard')");
     },
   });
 
