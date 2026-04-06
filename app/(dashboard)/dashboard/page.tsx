@@ -1,10 +1,10 @@
 "use client";
 
-import { useAuth } from "@/lib/hooks/use-auth";
-import { useEmployees } from "@/lib/hooks/use-employees";
-import { useProjects } from "@/lib/hooks/use-projects";
-import { useTasks } from "@/lib/hooks/use-tasks";
-import { useClients } from "@/lib/hooks/use-clients";
+import { useAuth } from "@/features/auth";
+import { useEmployees } from "@/features/employees";
+import { useProjects } from "@/features/projects";
+import { useTasks } from "@/features/tasks";
+import { useClients } from "@/features/clients";
 import { Users, Briefcase, CheckSquare, Building2 } from "lucide-react";
 
 export default function DashboardPage() {

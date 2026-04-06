@@ -1,13 +1,11 @@
 "use client";
 
-import { useClients } from "@/lib/hooks/use-clients";
-import { useAuth } from "@/lib/hooks/use-auth";
-import { RoleGuard } from "@/components/auth/role-guard";
+import { useClients, clientSchema, ClientInput } from "@/features/clients";
+import { useAuth, RoleGuard } from "@/features/auth";
 import { Plus, Pencil, Trash2, Mail, Phone } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { clientSchema, ClientInput } from "@/lib/schemas/client.schema";
 import { toast } from "sonner";
 
 export default function ClientsPage() {

@@ -1,17 +1,16 @@
 "use client";
 
-import { useEmployees } from "@/lib/hooks/use-employees";
-import { useAuth } from "@/lib/hooks/use-auth";
-import { RoleGuard } from "@/components/auth/role-guard";
-import { Plus, Pencil, Trash2 } from "lucide-react";
-import Link from "next/link";
+import {
+  useEmployees,
+  Employee,
+  EmployeeInput,
+  EmployeeTable,
+  EmployeeDialog,
+} from "@/features/employees";
+import { useAuth, RoleGuard } from "@/features/auth";
+import { Plus } from "lucide-react";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { employeeSchema, EmployeeInput } from "@/lib/schemas/employee.schema";
 import { toast } from "sonner";
-import { DataTable } from "./data-table";
-import { getEmployeeColumns } from "./columns";
 
 export default function EmployeesPage() {
   const {
@@ -20,29 +19,24 @@ export default function EmployeesPage() {
     createEmployee,
     updateEmployee,
     deleteEmployee,
+    isCreating,
+    isUpdating,
   } = useEmployees();
   const { user } = useAuth();
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [editingEmployee, setEditingEmployee] = useState<any>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<EmployeeInput>({
-    resolver: zodResolver(employeeSchema),
-  });
-
-  const onSubmit = (data: EmployeeInput) => {
+  const handleSubmit = (data: EmployeeInput) => {
     if (editingEmployee) {
       updateEmployee(
         { id: editingEmployee.id, data },
         {
           onSuccess: () => {
             toast.success("Employee updated successfully");
-            setEditingEmployee(null);
-            reset();
+            handleCloseDialog();
+          },
+          onError: () => {
+            toast.error("Failed to update employee");
           },
         },
       );
@@ -50,17 +44,18 @@ export default function EmployeesPage() {
       createEmployee(data, {
         onSuccess: () => {
           toast.success("Employee created successfully");
-          setIsCreateOpen(false);
-          reset();
+          handleCloseDialog();
+        },
+        onError: () => {
+          toast.error("Failed to create employee");
         },
       });
     }
   };
 
-  const handleEdit = (employee: any) => {
+  const handleEdit = (employee: Employee) => {
     setEditingEmployee(employee);
-    setIsCreateOpen(true);
-    reset(employee);
+    setIsDialogOpen(true);
   };
 
   const handleDelete = (id: string) => {
@@ -69,23 +64,24 @@ export default function EmployeesPage() {
         onSuccess: () => {
           toast.success("Employee deleted successfully");
         },
+        onError: () => {
+          toast.error("Failed to delete employee");
+        },
       });
     }
   };
 
   const handleCloseDialog = () => {
-    setIsCreateOpen(false);
+    setIsDialogOpen(false);
     setEditingEmployee(null);
-    reset();
+  };
+
+  const handleAddEmployee = () => {
+    setEditingEmployee(null);
+    setIsDialogOpen(true);
   };
 
   const isManager = user?.role === "admin" || user?.role === "manager";
-
-  const employeeColumns = getEmployeeColumns({
-    isManager,
-    handleEdit,
-    handleDelete,
-  });
 
   return (
     <div className="space-y-6">
@@ -96,7 +92,7 @@ export default function EmployeesPage() {
         </div>
         <RoleGuard allowedRoles={["admin", "manager"]}>
           <button
-            onClick={() => setIsCreateOpen(true)}
+            onClick={handleAddEmployee}
             className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
           >
             <Plus className="h-4 w-4" />
@@ -114,65 +110,21 @@ export default function EmployeesPage() {
           <p className="text-muted-foreground">No employees found</p>
         </div>
       ) : (
-        <div className="rounded-lg bg-white shadow-sm">
-          <div className="overflow-x-auto">
-            <DataTable columns={employeeColumns} data={employees} />
-          </div>
-        </div>
+        <EmployeeTable
+          employees={employees}
+          isManager={isManager}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
       )}
 
-      {isCreateOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
-            <h2 className="text-xl font-semibold">
-              {editingEmployee ? "Edit Employee" : "Add Employee"}
-            </h2>
-            <form onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-4">
-              <div>
-                <label className="block text-sm font-medium">Name</label>
-                <input
-                  {...register("name")}
-                  className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                />
-                {errors.name && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.name.message}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium">Position</label>
-                <input
-                  {...register("position")}
-                  className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                />
-                {errors.position && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.position.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  type="submit"
-                  className="flex-1 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-                >
-                  {editingEmployee ? "Update" : "Create"}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCloseDialog}
-                  className="flex-1 rounded-md border px-4 py-2 text-sm font-medium hover:bg-muted"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <EmployeeDialog
+        isOpen={isDialogOpen}
+        employee={editingEmployee}
+        onClose={handleCloseDialog}
+        onSubmit={handleSubmit}
+        isSubmitting={isCreating || isUpdating}
+      />
     </div>
   );
 }

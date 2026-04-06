@@ -1,6 +1,6 @@
 "use client";
 
-import { Employee } from "@/lib/types";
+import { Employee } from "@/features/employees";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, PencilIcon, Trash2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -46,7 +46,33 @@ export const getEmployeeColumns = ({
     header: "Team Location",
   },
   {
+    accessorKey: "employeeStatus",
+    header: "Status",
+    cell: ({ row }) => {
+      const status = row.getValue("employeeStatus") as string;
+      const statusColors = {
+        active: "bg-green-100 text-green-800",
+        resigned: "bg-gray-100 text-gray-800",
+        contract: "bg-blue-100 text-blue-800",
+      };
+      return (
+        <span
+          className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
+            statusColors[status as keyof typeof statusColors] || ""
+          }`}
+        >
+          {status?.charAt(0).toUpperCase() + status?.slice(1)}
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: "phone",
+    header: "Phone",
+  },
+  {
     id: "actions",
+    header: () => <div className="text-right">Actions</div>,
     cell: ({ row }) => {
       const employee = row.original;
       return (
@@ -55,12 +81,14 @@ export const getEmployeeColumns = ({
             <button
               onClick={() => handleEdit(employee)}
               className="rounded p-1 hover:bg-muted"
+              title="Edit employee"
             >
               <PencilIcon className="h-4 w-4" />
             </button>
             <button
               onClick={() => handleDelete(employee.id)}
               className="rounded p-1 hover:bg-muted"
+              title="Delete employee"
             >
               <Trash2Icon className="h-4 w-4 text-red-600" />
             </button>

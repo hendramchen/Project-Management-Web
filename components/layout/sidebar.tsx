@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAuth } from "@/lib/hooks/use-auth";
+import { useAuth } from "@/features/auth";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
