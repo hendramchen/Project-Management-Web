@@ -16,7 +16,7 @@ export interface Employee {
   startWorkingDate: Date;
   position: string;
   teamLocation: string;
-  employeeStatus: EmploymentStatus;
+  employmentStatus: EmploymentStatus;
   phone: string;
   address: string;
   user: User;

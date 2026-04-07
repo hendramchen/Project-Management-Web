@@ -1,7 +1,7 @@
 "use client";
 
 import { useClients, clientSchema, ClientInput } from "@/features/clients";
-import { useAuth, RoleGuard } from "@/features/auth";
+import { useAuth } from "@/features/auth";
 import { Plus, Pencil, Trash2, Mail, Phone } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";

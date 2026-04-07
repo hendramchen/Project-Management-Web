@@ -1,13 +1,12 @@
 "use client";
 
-import { useSkills } from "@/lib/hooks/use-skills";
-import { useAuth } from "@/lib/hooks/use-auth";
-import { RoleGuard } from "@/components/auth/role-guard";
+import { useSkills } from "@/features/skills";
+import { useAuth, RoleGuard } from "@/features/auth";
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { skillSchema, SkillInput } from "@/lib/schemas/skill.schema";
+import { skillSchema, SkillInput } from "@/features/skills";
 import { toast } from "sonner";
 
 export default function SkillsPage() {

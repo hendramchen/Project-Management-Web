@@ -1,20 +1,21 @@
 "use client";
 
-import { useProjects } from "@/lib/hooks/use-projects";
-import { useClients } from "@/lib/hooks/use-clients";
-import { useAuth } from "@/lib/hooks/use-auth";
-import { RoleGuard } from "@/components/auth/role-guard";
+import { useProjects } from "@/features/projects";
+import { useClients } from "@/features/clients";
+import { useAuth, RoleGuard } from "@/features/auth";
+// import { RoleGuard } from "@/components/auth/role-guard";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { projectSchema, ProjectInput } from "@/lib/schemas/project.schema";
+import { projectSchema, ProjectInput } from "@/features/projects";
 import { toast } from "sonner";
 
 const statusColors = {
+  planning: "bg-gray-200 text-gray-800",
   active: "bg-blue-200 text-blue-800",
   completed: "bg-green-200 text-green-800",
-  on_hold: "bg-yellow-200 text-yellow-800",
+  paused: "bg-yellow-200 text-yellow-800",
 };
 
 export default function ProductsPage() {
@@ -121,7 +122,7 @@ export default function ProductsPage() {
                 <div className="flex-1">
                   <h3 className="font-semibold">{project.name}</h3>
                   <span
-                    className={`mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium capitalize ${statusColors[project.status]}`}
+                    className={`mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium capitalize ${statusColors[project.status as keyof typeof statusColors]}`}
                   >
                     {project.status.replace("_", " ")}
                   </span>
@@ -239,7 +240,7 @@ export default function ProductsPage() {
                 </div>
               </div>
 
-              <div>
+              {/* <div>
                 <label className="block text-sm font-medium">Status</label>
                 <select
                   {...register("status")}
@@ -249,7 +250,7 @@ export default function ProductsPage() {
                   <option value="completed">Completed</option>
                   <option value="on_hold">On Hold</option>
                 </select>
-              </div>
+              </div> */}
 
               <div className="flex gap-2">
                 <button

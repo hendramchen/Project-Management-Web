@@ -18,21 +18,21 @@ export function useAuth() {
 
   const loginMutation = useMutation({
     mutationFn: authApi.login,
-    onSuccess: (data) => {
-      console.log("loginMutation onSuccess", data);
+    onSuccess: async (data) => {
       localStorage.setItem("access_token", data.data.accessToken);
       queryClient.setQueryData(["user"], data.data.user);
+      await queryClient.invalidateQueries({ queryKey: ["user"] });
       router.push("/dashboard");
-      console.log("router.push('/dashboard')");
     },
   });
 
   const registerMutation = useMutation({
     mutationFn: authApi.register,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       localStorage.setItem("access_token", data.data.accessToken);
       queryClient.setQueryData(["user"], data.data.user);
-      router.push("/dashboard");
+      await queryClient.invalidateQueries({ queryKey: ["user"] });
+      router.push("/projects");
     },
   });
 

@@ -1,14 +1,12 @@
 "use client";
 
-import { useSprints } from "@/lib/hooks/use-sprints";
-import { useProjects } from "@/lib/hooks/use-projects";
-import { useAuth } from "@/lib/hooks/use-auth";
-import { RoleGuard } from "@/components/auth/role-guard";
+import { useSprints, sprintSchema, SprintInput } from "@/features/sprints";
+import { useProjects } from "@/features/projects";
+import { useAuth, RoleGuard } from "@/features/auth";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { sprintSchema, SprintInput } from "@/lib/schemas/sprint.schema";
 import { toast } from "sonner";
 
 const statusColors = {

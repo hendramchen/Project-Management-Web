@@ -46,10 +46,10 @@ export const getEmployeeColumns = ({
     header: "Team Location",
   },
   {
-    accessorKey: "employeeStatus",
+    accessorKey: "employmentStatus",
     header: "Status",
     cell: ({ row }) => {
-      const status = row.getValue("employeeStatus") as string;
+      const status = row.getValue("employmentStatus") as string;
       const statusColors = {
         active: "bg-green-100 text-green-800",
         resigned: "bg-gray-100 text-gray-800",

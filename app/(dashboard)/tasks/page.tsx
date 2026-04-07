@@ -1,15 +1,13 @@
 "use client";
 
-import { useTasks } from "@/lib/hooks/use-tasks";
-import { useAuth } from "@/lib/hooks/use-auth";
-import { RoleGuard } from "@/components/auth/role-guard";
+import { useTasks, taskSchema, TaskInput } from "@/features/tasks";
+import { useAuth, RoleGuard } from "@/features/auth";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { taskSchema, TaskInput } from "@/lib/schemas/task.schema";
-import { useEmployees } from "@/lib/hooks/use-employees";
-import { useSprints } from "@/lib/hooks/use-sprints";
+import { useEmployees } from "@/features/employees";
+import { useSprints } from "@/features/sprints";
 import { toast } from "sonner";
 
 const statusColumns = [
