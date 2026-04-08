@@ -3,7 +3,8 @@
 import {
   useEmployees,
   Employee,
-  EmployeeInput,
+  CreateEmployeeInput,
+  UpdateEmployeeInput,
   EmployeeTable,
   EmployeeDialog,
 } from "@/features/employees";
@@ -26,10 +27,10 @@ export default function EmployeesPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
 
-  const handleSubmit = (data: EmployeeInput) => {
+  const handleSubmit = (data: CreateEmployeeInput | UpdateEmployeeInput) => {
     if (editingEmployee) {
       updateEmployee(
-        { id: editingEmployee.id, data },
+        { id: editingEmployee.id, data: data as UpdateEmployeeInput },
         {
           onSuccess: () => {
             toast.success("Employee updated successfully");
@@ -41,7 +42,7 @@ export default function EmployeesPage() {
         },
       );
     } else {
-      createEmployee(data, {
+      createEmployee(data as CreateEmployeeInput, {
         onSuccess: () => {
           toast.success("Employee created successfully");
           handleCloseDialog();

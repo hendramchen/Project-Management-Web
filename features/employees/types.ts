@@ -12,8 +12,8 @@ export interface Employee {
   id: string;
   firstName: string;
   lastName: string;
-  dateOfBirth: Date;
-  startWorkingDate: Date;
+  dateOfBirth: string;
+  startWorkingDate: string;
   position: string;
   teamLocation: string;
   employmentStatus: EmploymentStatus;

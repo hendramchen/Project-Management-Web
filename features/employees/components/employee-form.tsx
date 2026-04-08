@@ -2,7 +2,12 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { employeeSchema, EmployeeInput } from "../schemas/employee.schema";
+import {
+  createEmployeeSchema,
+  updateEmployeeSchema,
+  CreateEmployeeInput,
+  UpdateEmployeeInput,
+} from "../schemas/employee.schema";
 import { Employee } from "../types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -18,7 +24,7 @@ import { useEffect } from "react";
 
 interface EmployeeFormProps {
   employee?: Employee | null;
-  onSubmit: (data: EmployeeInput) => void;
+  onSubmit: (data: CreateEmployeeInput | UpdateEmployeeInput) => void;
   onCancel: () => void;
   isSubmitting?: boolean;
 }
@@ -36,8 +42,10 @@ export default function EmployeeForm({
     setValue,
     watch,
     formState: { errors },
-  } = useForm<EmployeeInput>({
-    resolver: zodResolver(employeeSchema),
+  } = useForm<CreateEmployeeInput | UpdateEmployeeInput>({
+    resolver: zodResolver(
+      employee ? updateEmployeeSchema : createEmployeeSchema,
+    ),
     defaultValues: employee
       ? {
           firstName: employee.firstName,
@@ -46,15 +54,14 @@ export default function EmployeeForm({
           startWorkingDate: employee.startWorkingDate,
           position: employee.position,
           teamLocation: employee.teamLocation,
-          employeeStatus: employee.employeeStatus,
+          employmentStatus: employee.employmentStatus,
           phone: employee.phone,
           address: employee.address,
-          userId: employee.user.id,
         }
       : undefined,
   });
 
-  const employeeStatus = watch("employeeStatus");
+  const employmentStatus = watch("employmentStatus");
 
   useEffect(() => {
     if (employee) {
@@ -65,16 +72,31 @@ export default function EmployeeForm({
         startWorkingDate: employee.startWorkingDate,
         position: employee.position,
         teamLocation: employee.teamLocation,
-        employeeStatus: employee.employeeStatus,
+        employmentStatus: employee.employmentStatus,
         phone: employee.phone,
         address: employee.address,
-        userId: employee.user.id,
-      });
+      } as UpdateEmployeeInput);
     }
   }, [employee, reset]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {employee ? (
+        <input type="hidden" {...register("userId")} />
+      ) : (
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            {...register("email")}
+            placeholder="employee@example.com"
+          />
+          {"email" in errors && errors.email && (
+            <p className="text-sm text-red-600">{errors.email.message}</p>
+          )}
+        </div>
+      )}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="firstName">First Name</Label>
@@ -100,7 +122,7 @@ export default function EmployeeForm({
             id="dateOfBirth"
             type="date"
             {...register("dateOfBirth", {
-              valueAsDate: true,
+              valueAsDate: false,
             })}
           />
           {errors.dateOfBirth && (
@@ -114,7 +136,7 @@ export default function EmployeeForm({
             id="startWorkingDate"
             type="date"
             {...register("startWorkingDate", {
-              valueAsDate: true,
+              valueAsDate: false,
             })}
           />
           {errors.startWorkingDate && (
@@ -150,25 +172,32 @@ export default function EmployeeForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="employeeStatus">Employment Status</Label>
+        <Label htmlFor="employmentStatus">Employment Status</Label>
+
         <Select
-          id="employeeStatus"
-          value={employeeStatus}
+          value={employmentStatus}
           onValueChange={(value: string) =>
             setValue(
-              "employeeStatus",
+              "employmentStatus",
               value as "active" | "resigned" | "contract",
             )
           }
         >
-          <SelectItem value="">Select status</SelectItem>
-          <SelectItem value="active">Active</SelectItem>
-          <SelectItem value="resigned">Resigned</SelectItem>
-          <SelectItem value="contract">Contract</SelectItem>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Employment Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="resigned">Resigned</SelectItem>
+              <SelectItem value="contract">Contract</SelectItem>
+            </SelectGroup>
+          </SelectContent>
         </Select>
-        {errors.employeeStatus && (
+
+        {errors.employmentStatus && (
           <p className="text-sm text-red-600">
-            {errors.employeeStatus.message}
+            {errors.employmentStatus.message}
           </p>
         )}
       </div>
@@ -195,14 +224,6 @@ export default function EmployeeForm({
         />
         {errors.address && (
           <p className="text-sm text-red-600">{errors.address.message}</p>
-        )}
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="userId">User ID</Label>
-        <Input id="userId" {...register("userId")} placeholder="User ID" />
-        {errors.userId && (
-          <p className="text-sm text-red-600">{errors.userId.message}</p>
         )}
       </div>
 

@@ -7,7 +7,8 @@ import {
   EmployeeWorkload,
 } from "../types";
 import {
-  EmployeeInput,
+  CreateEmployeeInput,
+  UpdateEmployeeInput,
   EmployeeSkillInput,
 } from "../schemas/employee.schema";
 
@@ -52,9 +53,11 @@ export const employeesApi = {
     return response.data;
   },
 
-  create: async (data: EmployeeInput): Promise<{ data: Employee }> => {
+  createWithUser: async (
+    data: CreateEmployeeInput,
+  ): Promise<{ data: Employee }> => {
     const response = await apiClient.post<{ data: Employee }>(
-      "/employees",
+      "/employees/with-user",
       data,
     );
     return response.data;
@@ -62,7 +65,7 @@ export const employeesApi = {
 
   update: async (
     id: string,
-    data: Partial<EmployeeInput>,
+    data: Partial<UpdateEmployeeInput>,
   ): Promise<{ data: Employee }> => {
     const response = await apiClient.patch<{ data: Employee }>(
       `/employees/${id}`,

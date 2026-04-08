@@ -4,6 +4,7 @@ import { Employee } from "@/features/employees";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, PencilIcon, Trash2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -30,6 +31,17 @@ export const getEmployeeColumns = ({
           First Name
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
+      );
+    },
+    cell: ({ row }) => {
+      const firstName = row.getValue("firstName") as string;
+      return (
+        <Link
+          href={`/employees/${row.original.id}`}
+          className="text-primary hover:underline font-medium"
+        >
+          {firstName}
+        </Link>
       );
     },
   },

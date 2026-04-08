@@ -2,7 +2,10 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { employeesApi } from "../api/employees";
-import { EmployeeInput, EmployeeSkillInput } from "../schemas/employee.schema";
+import {
+  UpdateEmployeeInput,
+  EmployeeSkillInput,
+} from "../schemas/employee.schema";
 import { Employee } from "../types";
 
 export function useEmployees() {
@@ -14,20 +17,34 @@ export function useEmployees() {
   });
 
   const createMutation = useMutation({
-    mutationFn: employeesApi.create,
+    mutationFn: employeesApi.createWithUser,
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<EmployeeInput> }) =>
-      employeesApi.update(id, data),
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: Partial<UpdateEmployeeInput>;
+    }) => employeesApi.update(id, data),
     onMutate: async ({ id, data }) => {
       await queryClient.cancelQueries({ queryKey: ["employees"] });
       const previous = queryClient.getQueryData(["employees"]);
-      queryClient.setQueryData(["employees"], (old: Employee[] = []) =>
-        old.map((emp) => (emp.id === id ? { ...emp, ...data } : emp)),
+      queryClient.setQueryData(
+        ["employees"],
+        (old: { data: Employee[] } | undefined) => {
+          if (!old?.data) return old;
+          return {
+            ...old,
+            data: old.data.map((emp) =>
+              emp.id === id ? { ...emp, ...data } : emp,
+            ),
+          };
+        },
       );
       return { previous };
     },
@@ -47,8 +64,15 @@ export function useEmployees() {
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: ["employees"] });
       const previous = queryClient.getQueryData(["employees"]);
-      queryClient.setQueryData(["employees"], (old: Employee[] = []) =>
-        old.filter((emp) => emp.id !== id),
+      queryClient.setQueryData(
+        ["employees"],
+        (old: { data: Employee[] } | undefined) => {
+          if (!old?.data) return old;
+          return {
+            ...old,
+            data: old.data.filter((emp) => emp.id !== id),
+          };
+        },
       );
       return { previous };
     },
