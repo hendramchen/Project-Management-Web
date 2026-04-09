@@ -106,4 +106,42 @@ export const employeesApi = {
   removeSkill: async (id: string): Promise<void> => {
     await apiClient.delete(`/assignments/employee-skills/${id}`);
   },
+
+  assignProject: async (
+    employeeId: string,
+    data: {
+      projectId: string;
+      role: string;
+      allocationPercentage: number;
+      assignedDate: string;
+    },
+  ): Promise<{ data: EmployeeProject }> => {
+    const response = await apiClient.post<{ data: EmployeeProject }>(
+      "/assignments/employee-projects",
+      {
+        employeeId,
+        ...data,
+      },
+    );
+    return response.data;
+  },
+
+  updateProjectAssignment: async (
+    id: string,
+    data: Partial<{
+      role: string;
+      allocationPercentage: number;
+      assignedDate: string;
+    }>,
+  ): Promise<{ data: EmployeeProject }> => {
+    const response = await apiClient.patch<{ data: EmployeeProject }>(
+      `/assignments/employee-projects/${id}`,
+      data,
+    );
+    return response.data;
+  },
+
+  removeProject: async (id: string): Promise<void> => {
+    await apiClient.delete(`/assignments/employee-projects/${id}`);
+  },
 };

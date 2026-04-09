@@ -24,7 +24,10 @@ export const updateEmployeeSchema = z.object({
 
 export const employeeSkillSchema = z.object({
   skillId: z.string().min(1, "Skill is required"),
-  proficiencyLevel: z.enum(["beginner", "intermediate", "advanced", "expert"]),
+  proficiencyLevel: z.enum(["beginner", "intermediate", "expert"]),
+  yearsOfExperience: z
+    .number()
+    .min(0, "Years of experience must be at least 0"),
 });
 
 export type CreateEmployeeInput = z.infer<typeof createEmployeeSchema>;

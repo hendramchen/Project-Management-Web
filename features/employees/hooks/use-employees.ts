@@ -113,23 +113,23 @@ export function useEmployee(id: string) {
   //   enabled: !!id,
   // });
 
-  // const { data: skills = [], isLoading: isLoadingSkills } = useQuery({
-  //   queryKey: ["employees", id, "skills"],
-  //   queryFn: () => employeesApi.getSkills(id),
-  //   enabled: !!id,
-  // });
+  const { data: skills, isLoading: isLoadingSkills } = useQuery({
+    queryKey: ["employees", id, "skills"],
+    queryFn: () => employeesApi.getSkills(id),
+    enabled: !!id,
+  });
 
-  // const { data: projects = [], isLoading: isLoadingProjects } = useQuery({
-  //   queryKey: ["employees", id, "projects"],
-  //   queryFn: () => employeesApi.getProjects(id),
-  //   enabled: !!id,
-  // });
+  const { data: projects, isLoading: isLoadingProjects } = useQuery({
+    queryKey: ["employees", id, "projects"],
+    queryFn: () => employeesApi.getProjects(id),
+    enabled: !!id,
+  });
 
-  // const { data: workload, isLoading: isLoadingWorkload } = useQuery({
-  //   queryKey: ["employees", id, "workload"],
-  //   queryFn: () => employeesApi.getWorkload(id),
-  //   enabled: !!id,
-  // });
+  const { data: workload, isLoading: isLoadingWorkload } = useQuery({
+    queryKey: ["employees", id, "workload"],
+    queryFn: () => employeesApi.getWorkload(id),
+    enabled: !!id,
+  });
 
   const addSkillMutation = useMutation({
     mutationFn: (data: EmployeeSkillInput) => employeesApi.addSkill(id, data),
@@ -161,22 +161,82 @@ export function useEmployee(id: string) {
     },
   });
 
+  const assignProjectMutation = useMutation({
+    mutationFn: (data: {
+      projectId: string;
+      role: string;
+      allocationPercentage: number;
+      assignedDate: string;
+    }) => employeesApi.assignProject(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["employees", id, "projects"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["employees", id, "workload"],
+      });
+      queryClient.invalidateQueries({ queryKey: ["employees", id, "profile"] });
+    },
+  });
+
+  const updateProjectAssignmentMutation = useMutation({
+    mutationFn: ({
+      assignmentId,
+      data,
+    }: {
+      assignmentId: string;
+      data: Partial<{
+        role: string;
+        allocationPercentage: number;
+        assignedDate: string;
+      }>;
+    }) => employeesApi.updateProjectAssignment(assignmentId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["employees", id, "projects"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["employees", id, "workload"],
+      });
+      queryClient.invalidateQueries({ queryKey: ["employees", id, "profile"] });
+    },
+  });
+
+  const removeProjectMutation = useMutation({
+    mutationFn: employeesApi.removeProject,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["employees", id, "projects"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["employees", id, "workload"],
+      });
+      queryClient.invalidateQueries({ queryKey: ["employees", id, "profile"] });
+    },
+  });
+
   return {
     employee,
     // profile,
-    // skills,
-    // projects,
-    // workload,
+    skills,
+    projects,
+    workload,
     isLoading: isLoading,
     // isLoading: isLoading || isLoadingProfile,
-    // isLoadingSkills,
-    // isLoadingProjects,
-    // isLoadingWorkload,
+    isLoadingSkills,
+    isLoadingProjects,
+    isLoadingWorkload,
     addSkill: addSkillMutation.mutate,
     isAddingSkill: addSkillMutation.isPending,
     updateSkill: updateSkillMutation.mutate,
     isUpdatingSkill: updateSkillMutation.isPending,
     removeSkill: removeSkillMutation.mutate,
     isRemovingSkill: removeSkillMutation.isPending,
+    assignProject: assignProjectMutation.mutate,
+    isAssigningProject: assignProjectMutation.isPending,
+    updateProjectAssignment: updateProjectAssignmentMutation.mutate,
+    isUpdatingProjectAssignment: updateProjectAssignmentMutation.isPending,
+    removeProject: removeProjectMutation.mutate,
+    isRemovingProject: removeProjectMutation.isPending,
   };
 }

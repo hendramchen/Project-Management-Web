@@ -37,7 +37,6 @@ export interface EmployeeSkill {
   level: SkillLevel;
   yearsOfExperience: number;
   createdAt: string;
-  updatedAt: string;
 }
 
 export interface EmployeeProject {
