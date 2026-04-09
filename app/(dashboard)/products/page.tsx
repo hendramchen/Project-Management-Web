@@ -1,30 +1,54 @@
 "use client";
 
-import { useProjects } from "@/features/projects";
+import {
+  useProjects,
+  ProjectTable,
+  AssignEmployeeDialog,
+  projectSchema,
+  ProjectInput,
+  Project,
+} from "@/features/projects";
 import { useClients } from "@/features/clients";
+import { useSprints } from "@/features/sprints";
 import { useAuth, RoleGuard } from "@/features/auth";
-// import { RoleGuard } from "@/components/auth/role-guard";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { projectsApi } from "@/features/projects";
+import { Plus } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { projectSchema, ProjectInput } from "@/features/projects";
 import { toast } from "sonner";
-
-const statusColors = {
-  planning: "bg-gray-200 text-gray-800",
-  active: "bg-blue-200 text-blue-800",
-  completed: "bg-green-200 text-green-800",
-  paused: "bg-yellow-200 text-yellow-800",
-};
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { EmployeeProjectInput } from "@/features/projects";
 
 export default function ProductsPage() {
   const { projects, isLoading, createProject, updateProject, deleteProject } =
     useProjects();
   const { clients } = useClients();
+  const { sprints } = useSprints();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
+
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [editingProject, setEditingProject] = useState<any>(null);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [assigningProject, setAssigningProject] = useState<Project | null>(
+    null,
+  );
+
+  const assignEmployeeMutation = useMutation({
+    mutationFn: (data: EmployeeProjectInput & { projectId: string }) => {
+      const { projectId, ...rest } = data;
+      return projectsApi.assignEmployee(projectId, rest);
+    },
+    onSuccess: () => {
+      toast.success("Employee assigned successfully");
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["employees"] });
+      setAssigningProject(null);
+    },
+    onError: () => {
+      toast.error("Failed to assign employee");
+    },
+  });
 
   const {
     register,
@@ -59,7 +83,7 @@ export default function ProductsPage() {
     }
   };
 
-  const handleEdit = (project: any) => {
+  const handleEdit = (project: Project) => {
     setEditingProject(project);
     setIsCreateOpen(true);
     reset(project);
@@ -73,6 +97,10 @@ export default function ProductsPage() {
         },
       });
     }
+  };
+
+  const handleAssignEmployee = (project: Project) => {
+    setAssigningProject(project);
   };
 
   const handleCloseDialog = () => {
@@ -112,61 +140,14 @@ export default function ProductsPage() {
           <p className="text-muted-foreground">No projects found</p>
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {projects.map((project) => (
-            <div
-              key={project.id}
-              className="rounded-lg border bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <h3 className="font-semibold">{project.name}</h3>
-                  <span
-                    className={`mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium capitalize ${statusColors[project.status as keyof typeof statusColors]}`}
-                  >
-                    {project.status.replace("_", " ")}
-                  </span>
-                  {project.description && (
-                    <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
-                      {project.description}
-                    </p>
-                  )}
-                  <div className="mt-3 space-y-1 text-xs text-muted-foreground">
-                    <p>
-                      Start: {new Date(project.startDate).toLocaleDateString()}
-                    </p>
-                    {project.endDate && (
-                      <p>
-                        End: {new Date(project.endDate).toLocaleDateString()}
-                      </p>
-                    )}
-                    {project.client && (
-                      <p className="font-medium text-foreground">
-                        {project.client.name}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <RoleGuard allowedRoles={["admin", "manager"]}>
-                  <div className="flex gap-1">
-                    <button
-                      onClick={() => handleEdit(project)}
-                      className="rounded p-1 hover:bg-muted"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(project.id)}
-                      className="rounded p-1 hover:bg-muted"
-                    >
-                      <Trash2 className="h-4 w-4 text-red-600" />
-                    </button>
-                  </div>
-                </RoleGuard>
-              </div>
-            </div>
-          ))}
-        </div>
+        <ProjectTable
+          projects={projects}
+          sprints={sprints}
+          isManager={isManager}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onAssignEmployee={handleAssignEmployee}
+        />
       )}
 
       {isCreateOpen && (
@@ -271,6 +252,23 @@ export default function ProductsPage() {
           </div>
         </div>
       )}
+
+      <AssignEmployeeDialog
+        open={!!assigningProject}
+        onOpenChange={(open) => {
+          if (!open) setAssigningProject(null);
+        }}
+        projectName={assigningProject?.name || ""}
+        onSubmit={(data) => {
+          if (assigningProject) {
+            assignEmployeeMutation.mutate({
+              ...data,
+              projectId: assigningProject.id,
+            });
+          }
+        }}
+        isSubmitting={assignEmployeeMutation.isPending}
+      />
     </div>
   );
 }
